@@ -75,7 +75,7 @@ def split_sessions_By_d_prime(session_list, intermediate_threshold, post_thresho
 
 
 
-def get_condition_average(session_list, model_name):
+def get_condition_average(session_list, model_name, selected_coefficient):
 
     # Create Empty Lists To Hold Variables
     group_condition_1_array = []
@@ -100,7 +100,7 @@ def get_condition_average(session_list, model_name):
         start_window = regression_dictionary["Start_Window"]
         stop_window = regression_dictionary["Stop_Window"]
         trial_length = stop_window - start_window
-        condition_1_coefs = coefficient_matrix[0]
+        condition_1_coefs = coefficient_matrix[selected_coefficient]
         condition_1_coefs = np.transpose(condition_1_coefs)
         condition_1_coefs = np.nan_to_num(condition_1_coefs)
 
@@ -187,7 +187,7 @@ def get_time_window(session_list):
     return start_window, stop_window
 
 
-def create_regression_figure(control_session_list, mutant_session_list, model_name, save_directory):
+def create_genotype_regression_figure(control_session_list, mutant_session_list, model_name, save_directory, selected_coefficient):
 
 
     # Get Fine Mask and Atlas Outlines
@@ -218,7 +218,7 @@ def create_regression_figure(control_session_list, mutant_session_list, model_na
 
     # Get Time Window
     timestep = 36
-    start_window, stop_window = get_time_window(session_list)
+    start_window, stop_window = get_time_window(control_session_list)
     x_values = list(range(start_window , stop_window))
     x_values = np.multiply(x_values, timestep)
 
@@ -229,17 +229,17 @@ def create_regression_figure(control_session_list, mutant_session_list, model_na
     mutant_pre_learning_sessions, mutant_intermediate_learning_sessions, mutant_post_learning_sessions = split_sessions_By_d_prime(mutant_session_list, intermeidate_threshold, post_threshold)
 
     # Get Learning Type Averages
-    control_pre_learning = get_condition_average(control_pre_learning_sessions, model_name)
-    control_intermediate_learning = get_condition_average(control_intermediate_learning_sessions, model_name)
-    control_post_learning = get_condition_average(control_post_learning_sessions, model_name)
+    control_pre_learning = get_condition_average(control_pre_learning_sessions, model_name, selected_coefficient)
+    control_intermediate_learning = get_condition_average(control_intermediate_learning_sessions, model_name, selected_coefficient)
+    control_post_learning = get_condition_average(control_post_learning_sessions, model_name, selected_coefficient)
 
-    mutant_pre_learning = get_condition_average(mutant_pre_learning_sessions, model_name)
-    mutant_intermediate_learning = get_condition_average(mutant_intermediate_learning_sessions, model_name)
-    mutant_post_learning = get_condition_average(mutant_post_learning_sessions, model_name)
+    mutant_pre_learning = get_condition_average(mutant_pre_learning_sessions, model_name, selected_coefficient)
+    mutant_intermediate_learning = get_condition_average(mutant_intermediate_learning_sessions, model_name, selected_coefficient)
+    mutant_post_learning = get_condition_average(mutant_post_learning_sessions, model_name, selected_coefficient)
 
     plt.ion()
     figure_1 = plt.figure(figsize=(75,100))
-    number_of_timepoints = np.shape(pre_learning_vis_1)[0]
+    number_of_timepoints = np.shape(control_pre_learning)[0]
     print("Number Of Timepoints")
 
     for timepoint_index in range(number_of_timepoints):
@@ -284,7 +284,7 @@ def create_regression_figure(control_session_list, mutant_session_list, model_na
 
         # Add Masks
         control_pre_learning_image[inverse_mask_pixels] = [1,1,1,1]
-        control_intermediate_learning_vimage[inverse_mask_pixels] = [1,1,1,1]
+        control_intermediate_learning_image[inverse_mask_pixels] = [1,1,1,1]
         control_post_learning_image[inverse_mask_pixels] = [1,1,1,1]
 
         mutant_pre_learning_image[inverse_mask_pixels] = [1,1,1,1]
@@ -324,27 +324,19 @@ def create_regression_figure(control_session_list, mutant_session_list, model_na
         post_diff_axis.imshow(post_diff_image)
 
 
-
         # Remove Axes
-
-        # Create Axes """
-        pre_vis_1_axis.axis('off')
-        pre_vis_2_axis.axis('off')
+        control_pre_axis.axis('off')
+        mutant_pre_axis.axis('off')
         pre_diff_axis.axis('off')
 
-        intermediate_vis_1_axis.axis('off')
-        intermediate_vis_2_axis.axis('off')
+        control_intermediate_axis.axis('off')
+        mutant_intermediate_axis.axis('off')
         intermediate_diff_axis.axis('off')
 
-        post_vis_1_axis.axis('off')
-        post_vis_2_axis.axis('off')
+        control_post_axis.axis('off')
+        mutant_post_axis.axis('off')
         post_diff_axis.axis('off')
 
-
-        condition_1_axis.axis('off')
-        condition_2_axis.axis('off')
-        difference_axis.axis('off')
-        """
 
         plt.draw()
         plt.pause(0.1)
@@ -357,13 +349,7 @@ def create_regression_figure(control_session_list, mutant_session_list, model_na
 
 """
 
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_09_25_Discrimination_Imaging",
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_09_29_Discrimination_Imaging",
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_01_Discrimination_Imaging",
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_03_Discrimination_Imaging",
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_05_Discrimination_Imaging",
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_07_Discrimination_Imaging",
-    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_08_Discrimination_Imaging",
+
 
 """
 
@@ -383,6 +369,14 @@ control_session_list = [
     r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NRXN78.1A/2020_11_19_Discrimination_Imaging",
     r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NRXN78.1A/2020_11_21_Discrimination_Imaging",
     r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NRXN78.1A/2020_11_24_Discrimination_Imaging",
+
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_09_25_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_09_29_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_01_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_03_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_05_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_07_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK22.1A/2021_10_08_Discrimination_Imaging",
 
 ]
 
@@ -415,14 +409,26 @@ mutant_session_list = [
     r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK20.1B/2021_10_15_Discrimination_Imaging",
     r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK20.1B/2021_10_17_Discrimination_Imaging",
     r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK20.1B/2021_10_19_Discrimination_Imaging",
+
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_04_30_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_02_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_04_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_06_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_08_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_10_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_12_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_14_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_16_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_18_Discrimination_Imaging",
+    r"/media/matthew/Seagate Expansion Drive1/Processed_Widefield_Data/NXAK16.1B/2021_05_20_Discrimination_Imaging",
+
 ]
 
 
-save_directory = "/media/matthew/Expansion/Widefield_Analysis/Discrimination_Analysis/Average_Coefs/Controls"
-model_name = "All_Vis_1_All_Vis_2"
-create_regression_figure(control_session_list, model_name, save_directory)
 
-
-save_directory = "/media/matthew/Expansion/Widefield_Analysis/Discrimination_Analysis/Average_Coefs/Mutants"
+save_directory = "/media/matthew/Expansion/Widefield_Analysis/Discrimination_Analysis/Average_Coefs/Genotype_Comparison"
+save_directory = "/media/matthew/Expansion/Widefield_Analysis/Discrimination_Analysis/Average_Coefs/Genotype_Comparison_Vis_2"
 model_name = "All_Vis_1_All_Vis_2"
-create_regression_figure(mutant_session_list, model_name, save_directory)
+selected_coefficient = 1
+create_genotype_regression_figure(control_session_list, mutant_session_list, model_name, save_directory, selected_coefficient)
+

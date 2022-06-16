@@ -36,9 +36,6 @@ def plot_days_to_learn(control_dict, mutant_dict):
     plt.show()
 
 
-
-
-
 mutants = {
     "NRXN71.2A":21,
     "NXAK4.1A":28,
